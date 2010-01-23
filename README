@@ -1,0 +1,40 @@
+script-runner
+=============
+
+General purpose script runner for Windows.
+
+Intended to be accompanied by the actual script file (.rb, .pl, .tcl, or no
+extension) that will be executed using one of runners specified at compile
+time (ruby.exe, perl.exe, tclsh.exe, tclkitsh.exe, etc.).
+
+Building script-runner
+======================
+
+Run make ${lang}, where ${lang} is ruby, perl or tcl.
+
+This will create script-runner-${lang}.exe that you can then copy under
+any name you want (which depends on your script name).
+
+How script-runner works
+=======================
+
+For executable named script.exe it will try to look for files named
+script.ext (where .ext variants are defined at compile time) and for every
+existing script.ext file it will try every runner (defined at compile time) in
+order.
+
+For example, for ruby stub named script.exe it will try:
+
+    ruby.exe script.rb
+    ruby.exe script
+
+And for tcl stub named script.exe it will try:
+
+    tclsh.exe script.tcl
+    tclkitsh.exe script.tcl
+    tclsh.exe script.kit
+    tclkitsh.exe script.kit
+    tclsh.exe script
+    tclkitsh.exe script
+
+Extensions and runners are defined in script-runner-${lang}.c files.
