@@ -276,6 +276,29 @@ static int try_script(const TCHAR* name, const TCHAR* args, int* orc)
     return rc;
 }
 
+static BOOL WINAPI CtrlHandler(DWORD dwCtrlType)
+{
+    switch(dwCtrlType)
+    {
+    /* We want to give children a chance at handling these
+     * without their parent sudenly disappearing (default
+     * handler would kill us even if child handles them),
+     * so when Ctrl+C or Ctrl+Break is pressed we return
+     * TRUE to ignore them until our child exits.
+     *
+     * If we don't do this then our parent (typically
+     * cmd.exe) and our child would start fighting for
+     * control over input/output leading to very amusing
+     * results. :)
+     */
+    case CTRL_C_EVENT:
+    case CTRL_BREAK_EVENT:
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
 int main(int argc, char** argv)
 {
     int rc = 127;
@@ -299,7 +322,7 @@ int main(int argc, char** argv)
     _tcsncpy(name, modulename, moduleext - modulename);
     nameext = name + (moduleext - modulename);
 
-    signal(SIGINT, SIG_IGN); /* disable Ctrl+C */
+    SetConsoleCtrlHandler(&CtrlHandler, TRUE); /* let children handle Ctrl+C */
     for (ext = config.extensions; *ext; ++ext) {
         _tcscpy(nameext, *ext);
         if (!try_script(name, args, &rc)) {
@@ -307,7 +330,7 @@ int main(int argc, char** argv)
             break;
         }
     }
-    signal(SIGINT, SIG_DFL); /* enable Ctrl+C */
+    SetConsoleCtrlHandler(&CtrlHandler, FALSE); /* restore default behavior */
 
     if (!found)
         _ftprintf(stderr, _T("Error: stub could not find or execute the script file\n"));
