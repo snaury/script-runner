@@ -1,12 +1,14 @@
-.PHONY: all help ruby perl tcl python 
+LANGUAGES:=$(patsubst script-runner-%.c,%,$(wildcard script-runner-*.c))
 
-all: ruby perl tcl python
+.PHONY: all help $(LANGUAGES)
+
+all: $(LANGUAGES)
 
 help:
 	# Please run one of the following:
-	@ls -1 script-runner-*.c | sed -n 's/script-runner-\(.*\).c/#  make \1/p'
+	$(foreach lang,$(LANGUAGES),#	make $(lang) $(\n))
 	# Or if you want to compile all:
-	#  make
+	#	make
 
 CFLAGS = -s -Os -DUNICODE -D_UNICODE
 CC := gcc
@@ -16,11 +18,14 @@ script-runner.c: script-runner.h
 script-runner-%.exe: script-runner-%.c script-runner.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-ruby:   script-runner-ruby.exe
-perl:   script-runner-perl.exe
-tcl:    script-runner-tcl.exe
-python: script-runner-python.exe
+$(LANGUAGES):
+	make script-runner-$@.exe
 
 clean:
 	rm -f *.exe
 	rm -f *.o
+
+define \n
+
+
+endef
