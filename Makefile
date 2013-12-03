@@ -19,7 +19,7 @@ script-runner-%.exe: script-runner-%.c script-runner.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(LANGUAGES):
-	make script-runner-$@.exe
+	$(MAKE) script-runner-$@.exe
 
 clean:
 	rm -f *.exe
