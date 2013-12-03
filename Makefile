@@ -1,20 +1,31 @@
-all:
-	@echo Please run one of the following:
-	@echo make ruby
-	@echo make perl
-	@echo make tcl
+LANGUAGES:=$(patsubst script-runner-%.c,%,$(wildcard script-runner-*.c))
+
+.PHONY: all help $(LANGUAGES)
+
+all: $(LANGUAGES)
+
+help:
+	# Please run one of the following:
+	$(foreach lang,$(LANGUAGES),#	make $(lang) $(\n))
+	# Or if you want to compile all:
+	#	make
 
 CFLAGS = -s -Os -DUNICODE -D_UNICODE
+CC := gcc
 
-script-runner-%.exe: script-runner-%.c script-runner.c script-runner.h
-	gcc $(CFLAGS) -o $@ $< script-runner.c
+script-runner.c: script-runner.h
 
-ruby: script-runner-ruby.exe
-perl: script-runner-perl.exe
-tcl: script-runner-tcl.exe
+script-runner-%.exe: script-runner-%.c script-runner.c
+	$(CC) $(CFLAGS) -o $@ $^
 
-.PHONY: ruby perl tcl
+$(LANGUAGES):
+	make script-runner-$@.exe
 
 clean:
 	rm -f *.exe
 	rm -f *.o
+
+define \n
+
+
+endef
